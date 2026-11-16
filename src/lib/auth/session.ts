@@ -3,7 +3,11 @@
 export const SESSION_COOKIE = "ascent_session";
 export const SESSION_DAYS = 30;
 
-export type Role = "student" | "parent" | "admin";
+export type Role = "student" | "parent" | "admin"; // "admin" is legacy and treated as a student
+
+export function homeFor(role: Role) {
+  return role === "parent" ? "/parent/home" : "/today";
+}
 export type Session = { u: string; role: Role; exp: number };
 
 const DEV_SECRET = "dev-only-secret-set-AUTH_SECRET-in-vercel";

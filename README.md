@@ -21,7 +21,8 @@ Open **/screens** to see every screen listed under its canvas board number (D1â€
 ## Sign-in
 
 - Students and parents sign in at `/login` with a **username and password** (no phone codes).
-- Demo account: username `admin`. Only a salted scrypt hash of its password is stored, in `src/lib/auth/users.ts`. Remove this account before the real launch.
+- Demo accounts: `admin` (student, opens Today) and `parent` (parent, opens the parent area). Only salted scrypt hashes of the passwords are stored, in `src/lib/auth/users.ts`. Remove these accounts before the real launch.
+- The parent area (`/parent/*`, except sign-up) needs a parent account. A student who opens it is asked to sign in as a parent.
 - Sessions use a signed, httpOnly cookie that lasts 30 days. **Set `AUTH_SECRET`** in Vercel (Settings â†’ Environment Variables) to any long random string, then redeploy. Without it, the app uses a fallback secret that is not safe for production.
 - Signed-in pages: `/today`, `/learn`, `/me`, `/topic`, `/quiz`, `/result` and `/parent/*`. The demo topic (`?demo=1`) and the sign-up pages stay open.
 - Until Supabase is connected, new sign-ups are not saved. Finishing sign-up signs the person in on that device only, and only the demo account can sign in again later.

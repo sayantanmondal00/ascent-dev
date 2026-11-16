@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { SESSION_COOKIE, SESSION_DAYS, signSession, type Role } from "@/lib/auth/session";
+import { SESSION_COOKIE, SESSION_DAYS, homeFor, signSession, type Role } from "@/lib/auth/session";
 import { isReserved, verifyPassword } from "@/lib/auth/users";
 import { passwordProblem, usernameProblem } from "@/lib/auth/rules";
 
@@ -26,12 +26,15 @@ export type LoginState = { error?: string; username?: string };
 export async function login(_: LoginState, form: FormData): Promise<LoginState> {
   const username = String(form.get("username") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
-  const as = form.get("as") === "parent" ? "parent" : "student";
   if (!username || !password) return { error: "Enter your username and password.", username };
   const user = verifyPassword(username, password);
   if (!user) return { error: "That username and password don't match. Check them and try again.", username };
   await setSession(user.username, user.role);
-  redirect(safeNext(form.get("next"), as === "parent" ? "/parent/home" : "/today"));
+  // Go where the account belongs; a "next" link is used only if it is in that account's area.
+  const home = homeFor(user.role);
+  const next = safeNext(form.get("next"), home);
+  const nextIsParent = next.startsWith("/parent");
+  redirect(nextIsParent === (user.role === "parent") ? next : home);
 }
 
 /* Checks a new username and password at sign-up (step 1). Nothing is stored until a parent agrees. */

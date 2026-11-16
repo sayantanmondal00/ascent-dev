@@ -34,6 +34,11 @@ function LoginInner() {
           <h1 className="title-1" style={{ fontSize: 28 }}>Sign in</h1>
           <p className="muted p0">Use the username and password you made when you signed up.</p>
         </div>
+        {sp.get("reason") === "parent-only" && (
+          <p className="row p0 panel-gold" style={{ padding: "12px 14px", borderRadius: 14, fontSize: 14, alignItems: "flex-start" }}>
+            The parent area needs a parent login. Sign in with the parent&apos;s username and password.
+          </p>
+        )}
         <div className="as-field">
           <span className="as-field-label">I&apos;m a</span>
           <SegmentedControl label="Who is signing in" value={as} onChange={setAs} options={[{ id: "student", label: "Student" }, { id: "parent", label: "Parent" }]} />
