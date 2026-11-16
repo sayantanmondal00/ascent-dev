@@ -6,10 +6,14 @@ import { subjects } from "@/lib/data/content";
 import { SUBJECT_STATS, chapterProgress, chaptersFor, student } from "@/lib/data/student";
 import { badges, week } from "@/lib/data/social";
 import { LEVEL_LABEL } from "@/components/ui/primitives";
+import { cookies } from "next/headers";
+import { logout } from "@/app/auth-actions";
+import { SESSION_COOKIE, verifySession } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Me" };
 
-export default function MePage() {
+export default async function MePage() {
+  const session = await verifySession((await cookies()).get(SESSION_COOKIE)?.value);
   const maxM = Math.max(...week.map((d) => d.value));
   return (
     <main className="page">
@@ -101,6 +105,16 @@ export default function MePage() {
                 </span>
                 <Icon name="chevron-right" size={18} className="chev" />
               </Link>
+              <form action={logout} className="list-row" style={{ minHeight: 56 }}>
+                <span className="grow">
+                  <span className="title-3" style={{ display: "block", fontSize: 15 }}>Signed in as {session?.u ?? "–"}</span>
+                  <span className="small muted">Sign out on a shared phone so the next person starts fresh</span>
+                </span>
+                <button type="submit" className="as-btn as-btn--secondary">
+                  <Icon name="logout" size={18} />
+                  Sign out
+                </button>
+              </form>
             </div>
           </section>
           <section className="stack-2" style={{ gap: 10 }}>

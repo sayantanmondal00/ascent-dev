@@ -11,8 +11,9 @@ const GROUPS: { title: string; items: [string, string, string][] }[] = [
     title: "Day one: from a shared link to the first win",
     items: [
       ["D1", "Welcome", "/"],
+      ["In", "Sign in (username and password)", "/login"],
       ["Demo", "Demo topic (no sign-up)", `/topic/${DEMO_TOPIC_ID}?demo=1&step=watch`],
-      ["D2", "Sign up · phone and code", "/signup?demo=7"],
+      ["D2", "Sign up · username and password", "/signup?demo=7"],
       ["D3", "Ask a parent", "/signup/parent"],
       ["D4", "Parent agrees on this phone", "/signup/consent"],
       ["D5", "Waiting for a parent", "/signup/waiting"],

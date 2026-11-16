@@ -1,21 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Button, Logo, cx } from "@/components/ui/primitives";
-import { OTPInput, SegmentedControl, TextField } from "@/components/ui/forms";
-import { PhoneField } from "@/components/onboarding/parts";
+import { PasswordField, SegmentedControl, TextField } from "@/components/ui/forms";
+import { checkNewAccount, finishSignup } from "@/app/auth-actions";
+import { passwordProblem, usernameProblem } from "@/lib/auth/rules";
 
 /* P2–P3 · Parent sign-up in 4 steps: verify phone, permission (consent), add your child, first plan.
    The first plan's daily time is optional; skipping it starts the child at 30 XP a day. */
 function SetupInner() {
-  const router = useRouter();
   const sp = useSearchParams();
   const [step, setStep] = useState(Math.min(4, Math.max(1, Number(sp.get("step") ?? 1))));
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
   const [kid, setKid] = useState<"link" | "new">("link");
   const [linkCode, setLinkCode] = useState("KQ7-M2P");
@@ -24,26 +25,32 @@ function SetupInner() {
   const [shared, setShared] = useState(true);
   const [pin, setPin] = useState("");
   const [err, setErr] = useState("");
-  const names = ["Verify your phone", "Permission", "Add your child", "First plan"];
+  const names = ["Your login", "Permission", "Add your child", "First plan"];
   const child = "Iba";
 
-  function next() {
+  async function next() {
     setErr("");
     if (step === 1) {
-      if (phone.replace(/\D/g, "").length !== 10) return setErr("Enter your 10-digit mobile number.");
-      if (code.length !== 6) return setErr("Enter the 6-digit code.");
+      const u = username.trim().toLowerCase();
+      const problem = usernameProblem(u) ?? passwordProblem(password);
+      if (problem) return setErr(problem);
+      setBusy(true);
+      const res = await checkNewAccount(u, password);
+      setBusy(false);
+      if (res.error) return setErr(res.error);
     }
     if (step === 2 && !agree) return;
     if (step === 4) {
       if (shared && !/^\d{4}$/.test(pin)) return setErr("Choose a 4-digit PIN.");
-      return router.push("/parent/home");
+      setBusy(true);
+      return finishSignup(username, "parent");
     }
     setStep(step + 1);
     window.scrollTo({ top: 0 });
   }
 
   const blocked = step === 2 && !agree;
-  const label = step === 1 ? "Verify" : step === 2 ? (agree ? "I agree" : "Tick the box to agree") : step === 3 ? `Add ${child}` : "Start";
+  const label = busy ? "Checking…" : step === 1 ? "Continue" : step === 2 ? (agree ? "I agree" : "Tick the box to agree") : step === 3 ? `Add ${child}` : "Start";
 
   return (
     <div className="app">
@@ -64,10 +71,11 @@ function SetupInner() {
 
           {step === 1 && (
             <>
-              <h1 className="title-1" style={{ fontSize: 28 }}>Your phone number</h1>
-              <p className="muted p0" style={{ lineHeight: 1.45 }}>Use your own number, not {child}&apos;s. You&apos;ll use it to sign in to the parent area.</p>
-              <PhoneField id="p-phone" label="Mobile number" value={phone} onChange={(v) => { setPhone(v); setErr(""); }} />
-              <OTPInput value={code} onChange={(v) => { setCode(v); setErr(""); }} label="6-digit code" hint="Sent by SMS once you enter your number · Resend in 0:28" />
+              <h1 className="title-1" style={{ fontSize: 28 }}>Your parent login</h1>
+              <p className="muted p0" style={{ lineHeight: 1.45 }}>Make your own username and password, not {child}&apos;s. You&apos;ll use them to sign in to the parent area.</p>
+              <TextField label="Username" autoComplete="username" value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/\s/g, "")); setErr(""); }} hint="3 to 20 letters, numbers, dots or underscores." />
+              <PasswordField label="Password" autoComplete="new-password" value={password} onChange={(e) => { setPassword(e.target.value); setErr(""); }} hint="At least 8 characters, with a letter and a number." />
+              <p className="note">Already have a parent login? <Link href="/login?as=parent" className="strong">Sign in</Link></p>
             </>
           )}
 
@@ -196,7 +204,7 @@ function SetupInner() {
                 Back
               </Button>
             )}
-            <Button size="lg" className="cta" disabled={blocked} onClick={next}>
+            <Button size="lg" className="cta" disabled={blocked || busy} onClick={next}>
               {label}
             </Button>
           </div>

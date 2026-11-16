@@ -6,6 +6,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { Badge, Button } from "@/components/ui/primitives";
 import { BottomSheet, Toggle } from "@/components/ui/forms";
 import { ParentHeader } from "@/components/parent/ParentHeader";
+import { logout } from "@/app/auth-actions";
 
 /* P8 · Settings: children, guardians, leaderboards (both must allow), sign-in, notifications, data use, account, consent and data. */
 function Row({ icon, title, sub, href = "#", danger, onClick }: { icon: IconName; title: string; sub: string; href?: string; danger?: boolean; onClick?: () => void }) {
@@ -97,10 +98,11 @@ export default function ParentSettings() {
               <Row icon="lock" title="Change PIN" sub="4 digits · forgot it? Verify with an SMS code" href="/coming-soon?what=Change%20PIN" />
               <div className="stack-2" style={{ gap: 2, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
                 <span className="label muted" style={{ marginBottom: 4, fontSize: 13 }}>Signed in on</span>
-                <div className="row" style={{ minHeight: 52 }}>
+                <form action={logout} className="row" style={{ minHeight: 52 }}>
                   <Icon name="phone" size={20} />
                   <span className="grow"><span className="title-3" style={{ display: "block", fontSize: 15 }}>This phone</span><span className="small muted">Shared with {child} · parent area behind your PIN</span></span>
-                </div>
+                  <Button type="submit" variant="secondary">Sign out</Button>
+                </form>
                 <div className="row" style={{ minHeight: 52 }}>
                   <Icon name="phone" size={20} />
                   <span className="grow"><span className="title-3" style={{ display: "block", fontSize: 15 }}>Your own phone</span><span className="small muted">Last used yesterday</span></span>

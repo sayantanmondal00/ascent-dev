@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { cx } from "./primitives";
 
-export function TextField({ label, hint, error, prefix, value, onChange, placeholder, type = "text", inputMode, autoComplete, id: idProp }: {
-  label: string; hint?: string; error?: string; prefix?: string; value?: string; onChange?: (e: ChangeEvent<HTMLInputElement>) => void; placeholder?: string;
+export function TextField({ label, hint, error, prefix, value, onChange, placeholder, type = "text", inputMode, autoComplete, id: idProp, name, defaultValue }: {
+  name?: string; defaultValue?: string; label: string; hint?: string; error?: string; prefix?: string; value?: string; onChange?: (e: ChangeEvent<HTMLInputElement>) => void; placeholder?: string;
   type?: string; inputMode?: "text" | "numeric" | "tel" | "search" | "email" | "decimal"; autoComplete?: string; id?: string;
 }) {
   const gen = useId();
@@ -17,7 +17,7 @@ export function TextField({ label, hint, error, prefix, value, onChange, placeho
       {hint && <p id={`${id}-hint`} className="as-field-hint">{hint}</p>}
       <div className={cx("as-input-wrap", error && "has-error")}>
         {prefix && <span className="as-input-prefix">{prefix}</span>}
-        <input id={id} className="as-input" type={type} inputMode={inputMode} autoComplete={autoComplete} value={value} placeholder={placeholder} onChange={onChange} aria-invalid={error ? true : undefined} aria-describedby={describedBy} />
+        <input id={id} name={name} defaultValue={defaultValue} className="as-input" type={type} inputMode={inputMode} autoComplete={autoComplete} value={value} placeholder={placeholder} onChange={onChange} aria-invalid={error ? true : undefined} aria-describedby={describedBy} />
       </div>
       {error && (
         <p id={`${id}-err`} className="as-field-error">
@@ -143,6 +143,33 @@ export function Toast({ message, tone = "neutral", action }: { message: string; 
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+/* Password field with a show/hide button. */
+export function PasswordField({ label, name, value, onChange, error, hint, autoComplete = "current-password", id: idProp }: {
+  label: string; name?: string; value?: string; onChange?: (e: ChangeEvent<HTMLInputElement>) => void; error?: string; hint?: string; autoComplete?: string; id?: string;
+}) {
+  const gen = useId();
+  const id = idProp ?? gen;
+  const [show, setShow] = useState(false);
+  return (
+    <div className="as-field">
+      <label htmlFor={id} className="as-field-label">{label}</label>
+      {hint && <p id={`${id}-hint`} className="as-field-hint">{hint}</p>}
+      <div className={cx("as-input-wrap", error && "has-error")} style={{ paddingRight: 4 }}>
+        <input id={id} name={name} className="as-input" type={show ? "text" : "password"} autoComplete={autoComplete} value={value} onChange={onChange} aria-invalid={error ? true : undefined} aria-describedby={[hint ? `${id}-hint` : "", error ? `${id}-err` : ""].filter(Boolean).join(" ") || undefined} />
+        <button type="button" className="icon-btn plain" aria-label={show ? "Hide password" : "Show password"} aria-pressed={show} onClick={() => setShow(!show)}>
+          <Icon name={show ? "eye-off" : "eye"} size={20} />
+        </button>
+      </div>
+      {error && (
+        <p id={`${id}-err`} className="as-field-error">
+          <Icon name="cross" size={14} />
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -18,6 +18,14 @@ Open **/screens** to see every screen listed under its canvas board number (D1â€
 2. In Vercel, choose **Add New â†’ Project** and import the repo.
 3. Keep the default settings (Framework: Next.js) and deploy. No environment variables are needed yet.
 
+## Sign-in
+
+- Students and parents sign in at `/login` with a **username and password** (no phone codes).
+- Demo account: username `admin`. Only a salted scrypt hash of its password is stored, in `src/lib/auth/users.ts`. Remove this account before the real launch.
+- Sessions use a signed, httpOnly cookie that lasts 30 days. **Set `AUTH_SECRET`** in Vercel (Settings â†’ Environment Variables) to any long random string, then redeploy. Without it, the app uses a fallback secret that is not safe for production.
+- Signed-in pages: `/today`, `/learn`, `/me`, `/topic`, `/quiz`, `/result` and `/parent/*`. The demo topic (`?demo=1`) and the sign-up pages stay open.
+- Until Supabase is connected, new sign-ups are not saved. Finishing sign-up signs the person in on that device only, and only the demo account can sign in again later.
+
 ## Where things are
 
 | Path | What it holds |
@@ -34,7 +42,7 @@ Open **/screens** to see every screen listed under its canvas board number (D1â€
 
 ## Routes
 
-- **Day one:** `/` (welcome), `/signup`, `/signup/parent`, `/signup/consent`, `/signup/waiting`, `/signup/about`
+- **Day one:** `/` (welcome), `/login`, `/signup`, `/signup/parent`, `/signup/consent`, `/signup/waiting`, `/signup/about`
 - **Student:** `/today?mode=normal|day1|back|revision`, `/learn/[subject]`, `/learn/[subject]/[chapter]`, `/topic/[id]?step=`, `/quiz/[id]`, `/result/[id]`, `/me`, `/me/family`
 - **Parent:** `/parent` (profile switcher with PIN), `/parent/setup`, `/parent/home`, `/parent/progress`, `/parent/plan`, `/parent/messages`, `/parent/settings`
 - **Flows:** add `?demo=1` to a topic for the demo topic you can try without signing up, or `?first=1` for the day-one first-win flow
@@ -43,6 +51,6 @@ Open **/screens** to see every screen listed under its canvas board number (D1â€
 ## What's still placeholder
 
 - **Content:** only "Ohm's law and resistance" and "Real numbers: Euclid's division lemma" have full sample quizzes. Every other topic shows `[Your video]` and `[Your notes]`.
-- **Sign-in:** phone codes and PINs are simulated. Any 6 digits or 4 digits are accepted. Real sign-in needs Supabase phone auth and an Indian SMS provider with DLT registration.
+- **Sign-in:** new accounts aren't stored yet (no database). The parent PIN on a shared phone is simulated, so any 4 digits work.
 - **Not built yet:** the PWA offline service worker, and FSRS scheduling for flashcards (the flashcard ratings are visual only for now).
 - **Placeholders in the text:** `[Price]`, `[School name]`, `[Year]`, and the Maths exam date.

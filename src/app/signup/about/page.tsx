@@ -7,6 +7,7 @@ import { Button, cx } from "@/components/ui/primitives";
 import { SegmentedControl, TextField } from "@/components/ui/forms";
 import { OnboardHeader, OnboardPage } from "@/components/onboarding/parts";
 import { schools } from "@/lib/data/schools";
+import { finishSignup } from "@/app/auth-actions";
 
 /* D6 · About you (step 3 of 3): first name, class, school (search, no school codes at launch), study time. */
 export default function AboutYouPage() {
@@ -18,18 +19,25 @@ export default function AboutYouPage() {
   const [typed, setTyped] = useState(false);
   const [time, setTime] = useState("evening");
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const results = schools.filter((s) => words.every((w) => `${s.name} ${s.town}`.toLowerCase().includes(w)));
   const times = [["morning", "Before school"], ["afternoon", "After school"], ["evening", "Evening · 7 pm"], ["night", "Late night"]] as const;
 
-  function next() {
+  async function next() {
     if (!name.trim()) return setErr("Add your first name.");
     if (!school && !(typed && q.trim())) return setErr("Find your school, or type its name.");
-    router.push("/today?mode=day1");
+    let username = "";
+    try {
+      username = JSON.parse(sessionStorage.getItem("ascent-signup") ?? "{}").username ?? "";
+    } catch {}
+    if (!username) return router.push("/signup");
+    setBusy(true);
+    await finishSignup(username, "student");
   }
 
   return (
-    <OnboardPage footer={<Button size="lg" block onClick={next}>Start learning</Button>}>
+    <OnboardPage footer={<Button size="lg" block disabled={busy} onClick={next}>{busy ? "Setting up…" : "Start learning"}</Button>}>
       <OnboardHeader step="Step 3 of 3" />
       <div className="stack-2">
         <h1 className="title-1" style={{ fontSize: 28 }}>About you</h1>

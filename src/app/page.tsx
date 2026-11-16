@@ -17,7 +17,7 @@ export default function Welcome() {
             Sign up
           </Link>
           <p className="p0 muted" style={{ textAlign: "center", fontSize: 14 }}>
-            Already have an account? <Link href="/signup?signin=1" className="strong">Sign in</Link>
+            Already have an account? <Link href="/login" className="strong">Sign in</Link>
           </p>
         </>
       }
